@@ -1,5 +1,5 @@
 # Use the official FrankenPHP image as base
-FROM dunglas/frankenphp:latest-php8.3 as base
+FROM dunglas/frankenphp:latest as base
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \

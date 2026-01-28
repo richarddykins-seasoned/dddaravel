@@ -16,6 +16,7 @@
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
+        "laravel/boost": "^2.0",
         "jasonmccreary/laravel-test-assertions": "^2.8",
         "larastan/larastan": "^3.7",
         "laravel/pail": "^1.2.2",
@@ -25,7 +26,7 @@
         "nunomaduro/collision": "^8.6",
         "nunomaduro/phpinsights": "^2.13",
         "peckphp/peck": "^0.2.0",
-        "pestphp/pest": "^4.0",
+        "pestphp/pest": "^4.3",
         "pestphp/pest-plugin-arch": "^4.0",
         "pestphp/pest-plugin-drift": "^4.0",
         "pestphp/pest-plugin-faker": "^4.0",

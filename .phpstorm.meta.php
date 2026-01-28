@@ -38,9 +38,9 @@ namespace PHPSTORM_META {
     override(\collect(0)->get(1), elementType(0));
 
     // Enhanced Eloquent query builder
-    override(\App\Models\User::query()->first(), \App\Models\User::class | null);
-    override(\App\Models\User::query()->find(0), \App\Models\User::class | null);
-    override(\App\Models\User::query()->findOrFail(0), \App\Models\User::class);
+    override(\Domain\User\Models\User::query()->first(), \Domain\User\Models\User::class | null);
+    override(\Domain\User\Models\User::query()->find(0), \Domain\User\Models\User::class | null);
+    override(\Domain\User\Models\User::query()->findOrFail(0), \Domain\User\Models\User::class);
 
     // Response helpers
     override(\response()->json(0), \Illuminate\Http\JsonResponse::class);

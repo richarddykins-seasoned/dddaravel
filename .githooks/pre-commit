@@ -1,0 +1,159 @@
+#!/bin/bash
+
+# PHPStan-First Pre-commit Hook
+# This script runs quality checks before each commit to ensure code quality
+
+set -e
+
+echo "🔍 Running pre-commit quality checks..."
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Function to print colored output
+print_status() {
+    echo -e "${GREEN}✓${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}✗${NC} $1"
+}
+
+# Check if we have staged PHP files
+STAGED_PHP_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.php$' || true)
+
+if [ -z "$STAGED_PHP_FILES" ]; then
+    print_status "No PHP files staged for commit"
+    exit 0
+fi
+
+echo "📁 Checking staged PHP files:"
+echo "$STAGED_PHP_FILES"
+echo ""
+
+# 1. Run PHP syntax check
+echo "🔧 Checking PHP syntax..."
+for FILE in $STAGED_PHP_FILES; do
+    if [ -f "$FILE" ]; then
+        php -l "$FILE" > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            print_error "PHP syntax error in $FILE"
+            exit 1
+        fi
+    fi
+done
+print_status "PHP syntax check passed"
+
+# 2. Run Laravel Pint (code formatting)
+echo "🎨 Running Laravel Pint..."
+if ! ./vendor/bin/pint --test > /dev/null 2>&1; then
+    print_error "Code formatting issues found. Run 'composer format' to fix them."
+    echo ""
+    echo "Files that need formatting:"
+    ./vendor/bin/pint --test
+    exit 1
+fi
+print_status "Code formatting check passed"
+
+# 3. Run PHPStan analysis
+echo "🔍 Running PHPStan analysis..."
+if ! ./vendor/bin/phpstan analyse --memory-limit=2G --no-progress > /dev/null 2>&1; then
+    print_error "PHPStan found type errors. Please fix them before committing."
+    echo ""
+    echo "PHPStan errors:"
+    ./vendor/bin/phpstan analyse --memory-limit=2G --no-progress
+    exit 1
+fi
+print_status "PHPStan analysis passed"
+
+# 4. Run Rector check
+echo "🚀 Running Rector check..."
+if ! ./vendor/bin/rector process --dry-run > /dev/null 2>&1; then
+    print_warning "Rector found code that could be modernized."
+    echo "Run 'composer refactor' to apply improvements (optional)."
+fi
+print_status "Rector check completed"
+
+# 5. Run spell check
+echo "📝 Running spell check..."
+if ! ./vendor/bin/peck > /dev/null 2>&1; then
+    print_error "Spelling errors found. Please fix them or add to peck.json ignore list."
+    ./vendor/bin/peck
+    exit 1
+fi
+print_status "Spell check passed"
+
+# 6. Run tests if any test files are staged
+STAGED_TEST_FILES=$(echo "$STAGED_PHP_FILES" | grep 'tests/' || true)
+if [ -n "$STAGED_TEST_FILES" ]; then
+    echo "🧪 Running affected tests..."
+    if ! ./vendor/bin/pest --bail > /dev/null 2>&1; then
+        print_error "Some tests are failing. Please fix them before committing."
+        exit 1
+    fi
+    print_status "All tests passed"
+fi
+
+# 6a. Optional: Run code coverage check (set REQUIRE_COVERAGE=1 to enable)
+if [ "$REQUIRE_COVERAGE" = "1" ]; then
+    echo "📊 Checking code coverage..."
+    if ! ./vendor/bin/pest --coverage --min=70 > /dev/null 2>&1; then
+        print_error "Code coverage below minimum threshold (70%). Please add more tests."
+        echo ""
+        echo "Current coverage:"
+        ./vendor/bin/pest --coverage
+        exit 1
+    fi
+    print_status "Code coverage meets minimum threshold (70%)"
+fi
+
+# 7. Check for strict types declaration in new files
+echo "🔒 Checking for strict types declaration..."
+NEW_PHP_FILES=$(git diff --cached --name-only --diff-filter=A | grep '\.php$' || true)
+for FILE in $NEW_PHP_FILES; do
+    if [ -f "$FILE" ]; then
+        if ! head -10 "$FILE" | grep -q "declare(strict_types=1)"; then
+            print_error "Missing 'declare(strict_types=1);' in new file: $FILE"
+            echo "Please add 'declare(strict_types=1);' after the opening <?php tag."
+            exit 1
+        fi
+    fi
+done
+print_status "Strict types check passed"
+
+# 8. Check for proper return type hints in new methods
+echo "📋 Checking for return type hints..."
+for FILE in $STAGED_PHP_FILES; do
+    if [ -f "$FILE" ]; then
+        # Look for public/private/protected function without return type (excluding __construct, __destruct, etc.)
+        if grep -n "function [^_].*(" "$FILE" | grep -v "):" > /dev/null; then
+            print_warning "Methods without return types found in $FILE"
+            echo "Consider adding return type hints for better type safety."
+        fi
+    fi
+done
+print_status "Return type hints check completed"
+
+echo ""
+print_status "All quality checks passed! 🎉"
+echo ""
+echo "📊 Code Quality Summary:"
+echo "  ✓ PHP syntax valid"  
+echo "  ✓ Code properly formatted (Laravel Pint)"
+echo "  ✓ Type safety verified (PHPStan)"
+echo "  ✓ Modern PHP practices checked (Rector)" 
+echo "  ✓ Spelling verified (Peck)"
+echo "  ✓ Tests passing (if applicable)"
+echo "  ✓ Strict types enforced"
+if [ "$REQUIRE_COVERAGE" = "1" ]; then
+    echo "  ✓ Code coverage meets threshold (70%)"
+fi
+echo ""
+echo "Ready to commit! 🚀"

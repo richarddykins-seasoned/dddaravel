@@ -29,7 +29,7 @@ services:
       - ./:/app
     networks:
       web:
-        ipv4_address: 10.10.0.10
+        ipv4_address: 172.28.0.10
 
   db:
     image: mysql:${MYSQL_VERSION:-8.0}
@@ -54,7 +54,7 @@ services:
       - db-data:/var/lib/mysql
     networks:
       web:
-        ipv4_address: 10.10.0.5
+        ipv4_address: 172.28.0.5
 
   redis:
     image: redis:${REDIS_VERSION:-7-alpine}
@@ -73,13 +73,18 @@ services:
       - redis-data:/data
     networks:
       web:
-        ipv4_address: 10.10.0.6
+        ipv4_address: 172.28.0.6
     # ports:
     #   - "6379:6379"  # Uncomment to expose Redis port for external access
 
 networks:
   web:
-    external: true
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+          gateway: 172.28.0.1
 
 volumes:
   db-data:
