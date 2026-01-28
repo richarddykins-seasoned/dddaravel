@@ -26,6 +26,6 @@ Homestead.yaml
 Thumbs.db
 
 **/caddy
-caddy-root.crt
+/docker/ca-certificates
 frankenphp
 frankenphp-worker.php
