@@ -1,0 +1,21 @@
+# DDDaravel - Laravel (Production defaults)
+
+services:
+  api:
+    build:
+      context: .
+      target: production
+    container_name: ${COMPOSE_PROJECT_NAME:-dddaravel}-app
+    env_file:
+      - .env
+    environment:
+      # Common Laravel environment overrides (optional)
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      # If you terminate TLS at a proxy, set TRUSTED_PROXIES in .env instead.
+    ports:
+      - "${APP_PORT:-8000}:8000"
+      # If you later enable TLS with FrankenPHP, you can expose 443 as well.
+      # - "${HTTPS_PORT:-443}:443"
+    restart: unless-stopped
+    # No bind mounts in production; image contains the built app.

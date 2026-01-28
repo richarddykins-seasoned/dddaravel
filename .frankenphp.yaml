@@ -1,0 +1,32 @@
+# FrankenPHP configuration for Laravel API
+global:
+  # Enable request logging
+  debug: true
+
+# Server configuration
+servers:
+  :8000:
+    # Handle PHP files
+    php:
+      root: /app/public
+      index: index.php
+    
+    # Enable HTTP/2 and HTTP/3
+    protocols: 
+      - h1
+      - h2
+      - h3
+
+# Logging configuration  
+log:
+  level: INFO
+  output: stdout
+
+# Worker configuration for Octane
+worker:
+  # Enable worker mode for better performance
+  enabled: true
+  # Number of workers (auto-detect based on CPU cores)
+  count: auto
+  # Memory limit per worker
+  memory_limit: "512M"

@@ -1,0 +1,81 @@
+{
+	frankenphp
+	# Use local CA for development TLS
+	local_certs
+	# Enable debug mode for development
+	debug
+	# Enable admin API for development
+	admin 0.0.0.0:2019
+}
+
+# Main development domain
+dddaravel.test {
+	# Set the webroot to the public/ directory
+	root * public/
+
+	# Enable compression
+	encode zstd br gzip
+
+	# Execute PHP files from the public/ directory and serve assets
+	route {
+		php_server {
+			try_files {path} index.php
+		}
+	}
+
+	# Add some development-friendly headers
+	header {
+		# CORS headers for local development
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+		Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+
+		# Security headers (relaxed for development)
+		X-Frame-Options SAMEORIGIN
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+
+	# Handle preflight requests
+	@options method OPTIONS
+	respond @options 204
+
+	# Logging for development
+	log {
+		output stdout
+		format console
+		level DEBUG
+	}
+}
+
+# Alternative localhost setup (fallback)
+localhost {
+	# Set the webroot to the public/ directory
+	root * public/
+
+	# Enable compression
+	encode zstd br gzip
+
+	# Execute PHP files from the public/ directory and serve assets
+	route {
+		php_server {
+			try_files {path} index.php
+		}
+	}
+
+	# Development headers
+	header {
+		Access-Control-Allow-Origin *
+		Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+		Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+	}
+
+	@options method OPTIONS
+	respond @options 204
+
+	log {
+		output stdout
+		format console
+		level DEBUG
+	}
+}

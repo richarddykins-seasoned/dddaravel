@@ -1,0 +1,96 @@
+# Laravel local development overrides
+# Access via http://localhost:${APP_PORT:-8000}
+
+services:
+  api:
+    build:
+      context: .
+      target: development
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      # Enable Xdebug by setting XDEBUG_MODE in your .env (e.g. develop,debug)
+      XDEBUG_MODE: "${XDEBUG_MODE:-off}"
+    restart: always
+    tty: true
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2019:2019"  # Caddy admin API
+    volumes:
+      # Mount entire project into /app (the Dockerfile uses /app as WORKDIR)
+      - ./:/app
+    networks:
+      web:
+        ipv4_address: 10.10.0.10
+
+  db:
+    image: mysql:${MYSQL_VERSION:-8.0}
+    container_name: ${COMPOSE_PROJECT_NAME:-dddaravel}-db
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_USER: ${DB_USERNAME:-laravel}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    restart: always
+    ports:
+      - "3306:3306"  # Expose MySQL port for local development
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "laravel", "-psecret"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      web:
+        ipv4_address: 10.10.0.5
+
+  redis:
+    image: redis:${REDIS_VERSION:-7-alpine}
+    container_name: ${COMPOSE_PROJECT_NAME:-dddaravel}-redis
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD:-secret} --appendonly yes
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-secret}
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-secret}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - redis-data:/data
+    networks:
+      web:
+        ipv4_address: 10.10.0.6
+    # ports:
+    #   - "6379:6379"  # Uncomment to expose Redis port for external access
+
+networks:
+  web:
+    external: true
+
+volumes:
+  db-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /var/lib/db-data/dddaravel/mysql
+      o: bind
+  redis-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /var/lib/db-data/dddaravel/redis
+      o: bind

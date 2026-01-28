@@ -1,0 +1,39 @@
+{
+    "preset": "laravel",
+    "ignore": {
+        "words": [
+            "php",
+            "caddyfile",
+            "commitlint",
+            "filesystems",
+            "frankenphp",
+            "phpstan",
+            "rector",
+            "larastan",
+            "sanctum",
+            "octane",
+            "tinker",
+            "artisan",
+            "gigistry",
+            "pestphp",
+            "peckphp",
+            "balancer",
+            "middlewares",
+            "joo",
+            "joo's",
+            "ddd",
+            "dto",
+            "dtos",
+            "deserialization",
+            "webmozart",
+            "whitespace"
+        ],
+        "paths": [
+            "vendor/",
+            "node_modules/",
+            "storage/",
+            "bootstrap/cache/",
+            ".git/"
+        ]
+    }
+}
