@@ -14,14 +14,6 @@ class User extends Authenticatable
     use Notifiable;
 
     /**
-     * Create a new factory instance for the model.
-     */
-    protected static function newFactory()
-    {
-        return \Database\Factories\UserFactory::new();
-    }
-
-    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
@@ -41,6 +33,14 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
+    }
 
     /**
      * Get the attributes that should be cast.

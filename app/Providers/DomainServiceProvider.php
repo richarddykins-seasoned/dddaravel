@@ -47,13 +47,7 @@ class DomainServiceProvider extends ServiceProvider
      */
     private function registerServices(): void
     {
-        // Register OAuth2 provider interface
-        $this->app->singleton(
-            \Domain\Auth\Contracts\OAuth2ProviderInterface::class,
-            \Domain\Auth\Services\PassportOAuth2Provider::class
-        );
-
-        // Register any other domain services here
+        // Register any domain services here
         // Example:
         // $this->app->bind(SomeServiceInterface::class, SomeServiceImplementation::class);
     }
@@ -70,6 +64,5 @@ class DomainServiceProvider extends ServiceProvider
         //     \Domain\Users\Events\UserCreated::class,
         //     [SendWelcomeEmailListener::class, 'handle']
         // );
-
     }
 }

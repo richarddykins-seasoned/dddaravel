@@ -26,14 +26,15 @@
             "dtos",
             "deserialization",
             "webmozart",
-            "whitespace"
+            "whitespace",
+            "activitylog"
         ],
         "paths": [
-            "vendor/",
-            "node_modules/",
-            "storage/",
-            "bootstrap/cache/",
-            ".git/"
+            "vendor\/",
+            "node_modules\/",
+            "storage\/",
+            "bootstrap\/cache\/",
+            ".git\/"
         ]
     }
 }

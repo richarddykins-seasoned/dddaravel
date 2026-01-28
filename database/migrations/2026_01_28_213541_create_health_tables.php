@@ -8,29 +8,31 @@ use Spatie\Health\ResultStores\EloquentHealthResultStore;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         $connection = (new HealthCheckResultHistoryItem)->getConnectionName();
-        $tableName = EloquentHealthResultStore::getHistoryItemInstance()->getTable();
-    
-        Schema::connection($connection)->create($tableName, function (Blueprint $table) {
-            $table->id();
+        $historyItem = EloquentHealthResultStore::getHistoryItemInstance();
+        assert($historyItem instanceof HealthCheckResultHistoryItem);
+        $tableName = $historyItem->getTable();
 
-            $table->string('check_name');
-            $table->string('check_label');
-            $table->string('status');
-            $table->text('notification_message')->nullable();
-            $table->string('short_summary')->nullable();
-            $table->json('meta');
-            $table->timestamp('ended_at');
-            $table->uuid('batch');
+        Schema::connection($connection)->create($tableName, function (Blueprint $blueprint): void {
+            $blueprint->id();
 
-            $table->timestamps();
+            $blueprint->string('check_name');
+            $blueprint->string('check_label');
+            $blueprint->string('status');
+            $blueprint->text('notification_message')->nullable();
+            $blueprint->string('short_summary')->nullable();
+            $blueprint->json('meta');
+            $blueprint->timestamp('ended_at');
+            $blueprint->uuid('batch');
+
+            $blueprint->timestamps();
         });
-        
-        Schema::connection($connection)->table($tableName, function (Blueprint $table) {
-            $table->index('created_at');
-            $table->index('batch');
+
+        Schema::connection($connection)->table($tableName, function (Blueprint $blueprint): void {
+            $blueprint->index('created_at');
+            $blueprint->index('batch');
         });
     }
 };

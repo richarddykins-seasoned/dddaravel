@@ -21,11 +21,11 @@ class HealthController extends Controller
      */
     public function __invoke(): JsonResponse
     {
-        $healthResult = HealthCheckAction::make()->execute();
+        $healthCheckData = HealthCheckAction::make()->execute();
 
         return response()->json(
-            $healthResult->toApiResponse(),
-            $healthResult->getHttpStatusCode()
+            $healthCheckData->toApiResponse(),
+            $healthCheckData->getHttpStatusCode()
         );
     }
 }

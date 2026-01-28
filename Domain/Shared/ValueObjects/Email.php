@@ -54,6 +54,14 @@ final class Email extends ValueObject implements JsonSerializable
     }
 
     /**
+     * Get the email value for JSON serialization.
+     */
+    public function jsonSerialize(): string
+    {
+        return $this->value;
+    }
+
+    /**
      * Validate the email using webmozart/assert.
      */
     private function validate(string $email): void
@@ -70,13 +78,5 @@ final class Email extends ValueObject implements JsonSerializable
         } catch (\Webmozart\Assert\InvalidArgumentException $e) {
             throw new InvalidArgumentException($e->getMessage(), 0, $e);
         }
-    }
-
-    /**
-     * Get the email value for JSON serialization.
-     */
-    public function jsonSerialize(): string
-    {
-        return $this->value;
     }
 }
