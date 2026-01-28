@@ -11,6 +11,7 @@ Domain/{DomainName}/
 ├── DataTransferObjects/  # Data structures
 ├── Events/              # Domain events
 ├── Exceptions/          # Domain-specific exceptions
+├── Listeners/           # Domain event listeners
 ├── Models/              # Rich domain models
 └── ValueObjects/        # Domain value objects
 
@@ -425,33 +426,30 @@ class EmailTest extends TestCase
 }
 ```
 
-### Event Listeners
+### Listener Template
 ```php
 <?php
 
-namespace App\Listeners;
+declare(strict_types=1);
 
-use Domain\Users\Events\UserCreated;
-use Illuminate\Mail\Mailable;
-use Illuminate\Support\Facades\Mail;
+namespace Domain\{Domain}\Listeners;
 
-class SendWelcomeEmail
+use Domain\{Domain}\Events\{Something}Happened;
+
+final class {ListenerName}
 {
-    public function handle(UserCreated $event): void
+    public function handle({Something}Happened $event): void
     {
         // Access structured event data via DTO
         $eventData = $event->getEventData();
         
-        Mail::to($eventData->email)->send(
-            new WelcomeEmail(
-                $eventData->name,
-                $eventData->email,
-                $eventData->user_id
-            )
-        );
+        // Handle domain-specific side effects
+        // e.g., send notifications, update related entities, etc.
     }
 }
 ```
+
+**Note:** Domain-specific listeners should be in `Domain/{DomainName}/Listeners/`. Only use `app/Listeners` for cross-cutting infrastructure concerns (external API integrations, system-wide logging, etc.).
 
 ## Common Validation Attributes
 
@@ -516,6 +514,7 @@ tests/
 │           ├── DataTransferObjects/
 │           ├── Events/
 │           ├── Exceptions/
+│           ├── Listeners/
 │           └── ValueObjects/
 └── TestCase.php               # Base test case
 ```
@@ -543,7 +542,15 @@ tests/
 - [ ] Extends base `DomainEvent`
 - [ ] Contains minimal necessary data
 - [ ] Immutable
+- [ ] Has corresponding event data DTO
 - [ ] Event handler tests
+
+### Listeners
+- [ ] Located in domain's `Listeners/` directory for domain logic
+- [ ] Uses `app/Listeners` only for infrastructure concerns
+- [ ] Accesses event data via DTO
+- [ ] Handles one specific side effect
+- [ ] Listener tests with event dispatch
 
 ### Value Objects
 - [ ] Self-validating

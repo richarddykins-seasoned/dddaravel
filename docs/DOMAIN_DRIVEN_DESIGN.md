@@ -21,12 +21,14 @@ dddaravel/
 │   │   ├── DataTransferObjects/  # Base DTO class
 │   │   ├── Events/               # Base domain event class
 │   │   ├── Exceptions/           # Base domain exception class
+│   │   ├── Listeners/            # Base domain listener class
 │   │   └── ValueObjects/         # Base value object class
 │   └── Users/                    # Users domain
 │       ├── Actions/              # User business use cases
 │       ├── DataTransferObjects/  # User-specific DTOs
 │       ├── Events/               # User domain events
 │       ├── Exceptions/           # User-specific exceptions
+│       ├── Listeners/            # User domain event listeners
 │       ├── Models/               # Enhanced User model
 │       └── ValueObjects/         # User-specific value objects
 └── tests/                        # Domain-organized tests
@@ -322,6 +324,46 @@ final class UserAlreadyExistsException extends DomainException
 }
 ```
 
+### 8. Domain Listeners
+
+Event listeners that respond to domain events and contain domain-specific business logic.
+
+**Characteristics:**
+- Located in `Domain/{DomainName}/Listeners/` for domain-specific logic
+- Located in `app/Listeners` for cross-cutting infrastructure concerns (external APIs, system-wide logging)
+- Handle side effects of domain events
+- Access structured event data via DTOs
+- Keep domain logic within domain boundaries
+
+**Example:**
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Domain\Users\Listeners;
+
+use Domain\Users\Events\UserCreated;
+use Illuminate\Support\Facades\Mail;
+
+final class SendWelcomeEmail
+{
+    public function handle(UserCreated $event): void
+    {
+        // Access structured event data via DTO
+        $eventData = $event->getEventData();
+        
+        Mail::to($eventData->email)->send(
+            new WelcomeEmail(
+                $eventData->name,
+                $eventData->email,
+                $eventData->user_id
+            )
+        );
+    }
+}
+```
+
 ## Guidelines and Best Practices
 
 ### Naming Conventions
@@ -434,6 +476,7 @@ Current domains in the system:
 - **Builders**: `UserBuilder` (custom query builder)
 - **Models**: `User` (rich domain model)
 - **Events**: `UserCreated`
+- **Listeners**: `SendWelcomeEmail` (responds to UserCreated)
 - **Value Objects**: `Email`
 
 ## Development Workflow
